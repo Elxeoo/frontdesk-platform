@@ -1,0 +1,12 @@
+.env
+secrets.json
+*.pem
+*.key
+env/
+kubeconfig
+__pycache__/
+.venv/
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfplan
