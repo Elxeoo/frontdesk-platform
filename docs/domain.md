@@ -46,6 +46,7 @@ All dates use the hotel's time zone, `Europe/Istanbul`.
 | `departure_date` | Day of departure. |
 | `adults` | Number of adults in the party. |
 | `children` | Number of children in the party. |
+| `notes` | Optional special requests, such as a honeymoon or a late arrival. |
 | `status` | Reservation status, see below. |
 
 ## Room status
