@@ -71,6 +71,8 @@ In the checks, `$API` is the application's base URL, for example `http://localho
   | `REPORT_TARGET` | `database` or `blob` | Deployment manifest |
   | `REPORT_CONTAINER_URL` | Blob container for night audit reports | Deployment manifest |
   | `FAULT_ERROR_RATE`, `FAULT_LATENCY_MS` | Fault switches (C7) | Deployment manifest |
+  | `PORT` | HTTP port, `8080` by default | Deployment manifest |
+  | `DRAIN_SECONDS`, `SHUTDOWN_TIMEOUT_SECONDS` | Shutdown timing (C16), `5` and `15` by default | Deployment manifest |
 
 - **C12. No keys for Azure.** With `REPORT_TARGET=blob`, the night audit authenticates to Azure Storage
   through Workload Identity. No account key or connection string is used.

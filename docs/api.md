@@ -27,8 +27,11 @@ Every error has the same shape:
 | `422` | The body is malformed, or the new reservation breaks R1. | `VALIDATION` or `R1` |
 | `409` | The request conflicts with the current state: double booking or a check-in, check-out or cancel that a rule forbids. | `R2` to `R6` |
 | `409` | A room status change that the room status diagram does not allow. | `ROOM_STATUS` |
+| `503` | The database cannot be reached right now. Comes with `Retry-After`. | `UNAVAILABLE` |
 
-When a request breaks several rules, the first one in rule order is reported.
+When a request breaks several rules, one is reported. The reservation's status (R6) is checked
+first, because the other check-in rules mean nothing for a cancelled or finished stay; the rest
+follow rule order.
 
 ## Resources
 
@@ -96,8 +99,8 @@ Create request body:
 
 ## Front desk views
 
-These are the lists a receptionist checks at the start of a shift. Each takes an optional `?date=`
-(default: today) and returns reservations.
+These are the lists a receptionist checks at the start of a shift. Arrivals and departures take an
+optional `?date=` (default: today); in-house always shows who is in the hotel now.
 
 | Method and path | Shows | Order |
 | --- | --- | --- |
@@ -121,7 +124,9 @@ It closes a business day and writes a report:
 }
 ```
 
-`occupancy_rate` is occupied rooms divided by rooms that are not `out_of_order`.
+`occupancy_rate` is the rooms occupied that night divided by the rooms not `out_of_order` when the
+audit runs. A day is closed once: running the audit again for the same day returns the stored
+report and changes nothing. Only a day that has ended can be closed.
 
 | Method and path | Purpose | Success |
 | --- | --- | --- |

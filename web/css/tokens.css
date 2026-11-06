@@ -1,0 +1,150 @@
+/* Design tokens: type scale, spacing, radii, motion and the light and dark colour palettes. */
+
+:root {
+  color-scheme: light dark;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+
+  --text-xs: 0.6875rem;   /* 11px */
+  --text-sm: 0.75rem;     /* 12px */
+  --text-md: 0.8125rem;   /* 13px */
+  --text-base: 0.875rem;  /* 14px */
+  --text-lg: 1rem;        /* 16px */
+  --text-xl: 1.25rem;     /* 20px */
+  --leading: 1.45;
+  --leading-tight: 1.2;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 8px;
+
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --dur-flash: 1400ms;
+
+  --topbar-height: 64px;
+  --control-height: 32px;
+
+  /* Light theme: cool neutral greys, ink for primary actions, colour reserved for status. */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-sunken: #f8f9fa;
+  --surface-hover: #f0f2f4;
+  --border: #e2e5e9;
+  --border-strong: #cbd0d6;
+  --text: #15181d;
+  --text-muted: #59616c;
+  --text-faint: #6a737e;
+  --focus: #2463eb;
+
+  --primary-bg: #17191e;
+  --primary-bg-hover: #30343c;
+  --primary-fg: #ffffff;
+
+  --danger-fg: #b3261e;
+  --danger-bg: #fdeeec;
+  --danger-border: #f2bdb6;
+  --danger-solid: #c4321f;
+  --danger-solid-fg: #ffffff;
+  --warn-fg: #82470b;
+  --warn-bg: #fdf3e4;
+  --warn-border: #efcf9b;
+  --flash: #fff4c7;
+
+  --st-clean-bg: #eaf6ef;
+  --st-clean-border: #b8dfc6;
+  --st-clean-fg: #13663a;
+  --st-clean-accent: #1e9c55;
+
+  --st-occupied-bg: #ebf1fd;
+  --st-occupied-border: #bdd0f3;
+  --st-occupied-fg: #1c4e9c;
+  --st-occupied-accent: #3a75d5;
+
+  --st-dirty-bg: #fdf2e3;
+  --st-dirty-border: #eecd97;
+  --st-dirty-fg: #82470b;
+  --st-dirty-accent: #d47f1a;
+
+  --st-ooo-bg: #eff1f3;
+  --st-ooo-stripe: #e4e7eb;
+  --st-ooo-border: #cdd2d8;
+  --st-ooo-fg: #454d57;
+  --st-ooo-accent: #7c8590;
+
+  /* Version colours are generated from a hue (see badge.js); lightness and chroma follow the theme. */
+  --ver-lightness: 0.6;
+  --ver-chroma: 0.16;
+
+  --shadow-pop: 0 1px 2px rgb(16 22 34 / 0.06), 0 10px 28px rgb(16 22 34 / 0.14);
+  --shadow-badge: 0 1px 2px rgb(16 22 34 / 0.06), 0 4px 12px rgb(16 22 34 / 0.08);
+  --backdrop: rgb(14 17 23 / 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark theme: blue-black surfaces with lifted borders; status tints are deep, text tints are light. */
+    --bg: #0c0f13;
+    --surface: #13171d;
+    --surface-sunken: #101318;
+    --surface-hover: #1a1f26;
+    --border: #232a33;
+    --border-strong: #333c47;
+    --text: #e6e9ed;
+    --text-muted: #9ba4b0;
+    --text-faint: #87909c;
+    --focus: #79a6ff;
+
+    --primary-bg: #e6e9ed;
+    --primary-bg-hover: #ffffff;
+    --primary-fg: #0c0f13;
+
+    --danger-fg: #ff9b8f;
+    --danger-bg: #2b1513;
+    --danger-border: #5c2621;
+    --danger-solid: #d8412f;
+    --danger-solid-fg: #ffffff;
+    --warn-fg: #f1bc72;
+    --warn-bg: #2a1e0e;
+    --warn-border: #5b4019;
+    --flash: #3a3110;
+
+    --st-clean-bg: #0f2318;
+    --st-clean-border: #1f4a31;
+    --st-clean-fg: #79d6a0;
+    --st-clean-accent: #37b06c;
+
+    --st-occupied-bg: #0f1c33;
+    --st-occupied-border: #25437a;
+    --st-occupied-fg: #9bbefb;
+    --st-occupied-accent: #5592f0;
+
+    --st-dirty-bg: #291c0b;
+    --st-dirty-border: #5d4117;
+    --st-dirty-fg: #f1bc72;
+    --st-dirty-accent: #e1952e;
+
+    --st-ooo-bg: #181c22;
+    --st-ooo-stripe: #1e232a;
+    --st-ooo-border: #353e49;
+    --st-ooo-fg: #a9b2be;
+    --st-ooo-accent: #7f8995;
+
+    --ver-lightness: 0.72;
+    --ver-chroma: 0.15;
+
+    --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+    --shadow-badge: 0 1px 2px rgb(0 0 0 / 0.4), 0 6px 16px rgb(0 0 0 / 0.35);
+    --backdrop: rgb(0 0 0 / 0.6);
+  }
+}
