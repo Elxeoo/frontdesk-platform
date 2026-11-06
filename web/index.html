@@ -1,0 +1,355 @@
+<!doctype html>
+<!-- FrontDesk reception screen: page skeleton, icon sprite, dialogs and the templates the scripts fill in. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>FrontDesk</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/rack.css">
+  <link rel="stylesheet" href="css/desk.css">
+  <link rel="stylesheet" href="css/overlays.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-bell" viewBox="0 0 16 16"><path d="M2 12.5h12"/><path d="M3.25 12.5a4.75 4.75 0 0 1 9.5 0"/><path d="M8 7.75V5.5"/><path d="M6.5 5.25h3"/></symbol>
+    <symbol id="i-clean" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></symbol>
+    <symbol id="i-occupied" viewBox="0 0 16 16"><circle cx="8" cy="5.25" r="2.5"/><path d="M3.25 13.5c.55-2.45 2.45-3.9 4.75-3.9s4.2 1.45 4.75 3.9"/></symbol>
+    <symbol id="i-dirty" viewBox="0 0 16 16"><path d="M13.25 2.75L9.5 6.5"/><path d="M7.75 5.75l2.5 2.5-1.5 5.25-6.25-6.25z"/><path d="M5.5 11.5l1.5-1.5"/><path d="M4 10l1.5-1.5"/></symbol>
+    <symbol id="i-out_of_order" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.1 11.9l7.8-7.8"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.25v9.5M3.25 8h9.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 16 16"><path d="M4.25 4.25l7.5 7.5M11.75 4.25l-7.5 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2.25l6.25 11H1.75z"/><path d="M8 6.5v3"/><path d="M8 11.5v.25"/></symbol>
+    <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.25"/><path d="M10.25 10.25l3.5 3.5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 16 16"><path d="M13 9.75A5.25 5.25 0 0 1 6.25 3a5.25 5.25 0 1 0 6.75 6.75z"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.5-3.55"/><path d="M11.75 2v2.75H9"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="brand-mark" aria-hidden="true"><use href="#i-bell"/></svg>
+        <span class="brand-name">FrontDesk</span>
+      </div>
+
+      <div class="business-day">
+        <span class="eyebrow">Today</span>
+        <span class="business-day-value">
+          <time id="business-date" class="tabular"></time>
+          <span class="clock tabular" id="hotel-clock" title="Hotel time, Europe/Istanbul"></span>
+        </span>
+      </div>
+
+      <dl class="kpis" aria-label="Today at a glance">
+        <div class="kpi">
+          <dt class="eyebrow">Arrivals</dt>
+          <dd class="kpi-value tabular" id="kpi-arrivals">–</dd>
+          <dd class="kpi-sub" id="kpi-arrivals-sub"></dd>
+        </div>
+        <div class="kpi">
+          <dt class="eyebrow">Departures</dt>
+          <dd class="kpi-value tabular" id="kpi-departures">–</dd>
+          <dd class="kpi-sub" id="kpi-departures-sub"></dd>
+        </div>
+        <div class="kpi">
+          <dt class="eyebrow">In-house</dt>
+          <dd class="kpi-value tabular" id="kpi-inhouse">–</dd>
+          <dd class="kpi-sub" id="kpi-inhouse-sub"></dd>
+        </div>
+        <div class="kpi">
+          <dt class="eyebrow">Occupancy</dt>
+          <dd class="kpi-value tabular" id="kpi-occupancy">–</dd>
+          <dd class="kpi-sub" id="kpi-occupancy-sub"></dd>
+        </div>
+      </dl>
+
+      <p class="sync" id="sync-state" data-state="connecting">
+        <span class="sync-dot" aria-hidden="true"></span>
+        <span class="sync-text tabular" id="sync-text">Connecting</span>
+      </p>
+
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-primary" id="new-reservation">
+          <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+          <span>New reservation</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="banner" id="connection-banner" role="alert" hidden>
+      <div class="banner-inner">
+        <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+        <p class="banner-text"><strong id="banner-title"></strong> <span id="banner-detail"></span> <span class="tabular" id="banner-countdown" aria-hidden="true"></span><span class="visually-hidden" id="banner-retry-note"></span></p>
+        <button type="button" class="btn btn-small btn-on-danger" id="banner-retry">
+          <svg class="icon" aria-hidden="true"><use href="#i-retry"/></svg>
+          <span>Retry now</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="layout" tabindex="-1">
+    <section class="panel rack-panel" aria-labelledby="rack-title">
+      <header class="panel-head">
+        <h2 class="panel-title" id="rack-title">Room rack</h2>
+        <ul class="legend" id="rack-legend" aria-label="Room status counts"></ul>
+      </header>
+      <div class="rack" id="rack">
+        <p class="placeholder">Loading rooms</p>
+      </div>
+    </section>
+
+    <section class="panel desk-panel" aria-labelledby="desk-title">
+      <header class="panel-head desk-head">
+        <h2 class="panel-title" id="desk-title">Front desk</h2>
+        <label class="search">
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <span class="visually-hidden">Filter by guest or room</span>
+          <input type="search" id="desk-filter" placeholder="Filter guest or room" autocomplete="off" spellcheck="false">
+        </label>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="Front desk lists" id="desk-tabs">
+        <button type="button" role="tab" class="tab" id="tab-arrivals" aria-controls="panel-arrivals" aria-selected="true" data-list="arrivals">
+          Arrivals <span class="count tabular" data-count="arrivals">0</span>
+        </button>
+        <button type="button" role="tab" class="tab" id="tab-departures" aria-controls="panel-departures" aria-selected="false" tabindex="-1" data-list="departures">
+          Departures <span class="count tabular" data-count="departures">0</span>
+        </button>
+        <button type="button" role="tab" class="tab" id="tab-inhouse" aria-controls="panel-inhouse" aria-selected="false" tabindex="-1" data-list="inHouse">
+          In-house <span class="count tabular" data-count="inHouse">0</span>
+        </button>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-arrivals" aria-labelledby="tab-arrivals" tabindex="0">
+        <table class="res-table">
+          <caption class="visually-hidden">Expected arrivals, late arrivals first</caption>
+          <thead><tr><th scope="col">Room</th><th scope="col">Guest</th><th scope="col">Stay</th><th scope="col">Party</th><th scope="col">Notes</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+          <tbody data-list="arrivals"></tbody>
+        </table>
+        <p class="empty" data-empty="arrivals" hidden></p>
+      </div>
+      <div class="tabpanel" role="tabpanel" id="panel-departures" aria-labelledby="tab-departures" tabindex="0" hidden>
+        <table class="res-table">
+          <caption class="visually-hidden">Departures due today, overdue ones marked</caption>
+          <thead><tr><th scope="col">Room</th><th scope="col">Guest</th><th scope="col">Stay</th><th scope="col">Party</th><th scope="col">Notes</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+          <tbody data-list="departures"></tbody>
+        </table>
+        <p class="empty" data-empty="departures" hidden></p>
+      </div>
+      <div class="tabpanel" role="tabpanel" id="panel-inhouse" aria-labelledby="tab-inhouse" tabindex="0" hidden>
+        <table class="res-table">
+          <caption class="visually-hidden">Guests in house</caption>
+          <thead><tr><th scope="col">Room</th><th scope="col">Guest</th><th scope="col">Stay</th><th scope="col">Party</th><th scope="col">Notes</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+          <tbody data-list="inHouse"></tbody>
+        </table>
+        <p class="empty" data-empty="inHouse" hidden></p>
+      </div>
+    </section>
+
+    <section class="panel audit-panel" aria-labelledby="audit-title">
+      <header class="panel-head">
+        <h2 class="panel-title" id="audit-title">
+          <svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg>
+          Night audit
+        </h2>
+        <span class="panel-meta" id="audit-date"></span>
+      </header>
+      <div id="audit-body">
+        <p class="placeholder">Loading report</p>
+      </div>
+    </section>
+  </main>
+
+  <aside class="vbadge" aria-label="Serving version">
+    <details class="vbadge-details" id="vbadge">
+      <summary class="vbadge-summary">
+        <span class="vbadge-line">
+          <span class="ver-dot" id="vb-dot" aria-hidden="true"></span>
+          <span class="vbadge-version tabular" id="vb-version">waiting</span>
+          <span class="vbadge-pod" id="vb-pod">for the first API response</span>
+        </span>
+        <span class="vbadge-line">
+          <span class="split-bar" id="vb-bar" aria-hidden="true"></span>
+          <span class="split-labels tabular" id="vb-labels"></span>
+        </span>
+      </summary>
+      <div class="vbadge-body">
+        <p class="eyebrow" id="vb-window-label">Last 20 API responses, oldest first</p>
+        <ol class="ticks" id="vb-ticks" aria-labelledby="vb-window-label"></ol>
+        <table class="pods">
+          <caption class="visually-hidden">Responses per pod</caption>
+          <thead><tr><th scope="col">Pod</th><th scope="col">Version</th><th scope="col" class="num">Count</th></tr></thead>
+          <tbody id="vb-pods"></tbody>
+        </table>
+      </div>
+    </details>
+  </aside>
+
+  <div class="toasts" id="toasts" aria-live="polite" aria-relevant="additions"></div>
+
+  <div class="room-menu" id="room-menu" popover="manual" role="dialog" aria-labelledby="room-menu-title"></div>
+
+  <dialog class="dialog" id="checkin-dialog" aria-labelledby="checkin-title">
+    <form class="dialog-form" id="checkin-form" novalidate>
+      <header class="dialog-head">
+        <h2 class="dialog-title" id="checkin-title">Check in</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <dl class="summary">
+          <div class="summary-row"><dt>Guest</dt><dd data-slot="guest"></dd></div>
+          <div class="summary-row"><dt>Room</dt><dd data-slot="room"></dd></div>
+          <div class="summary-row"><dt>Stay</dt><dd class="tabular" data-slot="stay"></dd></div>
+          <div class="summary-row"><dt>Booked party</dt><dd data-slot="party"></dd></div>
+          <div class="summary-row" data-slot="notes-row"><dt>Notes</dt><dd data-slot="notes"></dd></div>
+        </dl>
+        <p class="callout callout-warn" data-slot="warning" hidden></p>
+        <fieldset class="field-grid">
+          <legend class="field-legend">Party at the desk</legend>
+          <div class="field">
+            <label for="ci-adults">Adults</label>
+            <input id="ci-adults" name="adults" type="number" min="0" max="20" step="1" inputmode="numeric" required aria-describedby="ci-hint">
+          </div>
+          <div class="field">
+            <label for="ci-children">Children</label>
+            <input id="ci-children" name="children" type="number" min="0" max="20" step="1" inputmode="numeric" required aria-describedby="ci-hint">
+          </div>
+        </fieldset>
+        <p class="hint" id="ci-hint">Must match the booking (R4). If the party is different, change the reservation first.</p>
+        <div class="form-error" data-slot="error" role="alert" hidden></div>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" class="btn" data-close>Close</button>
+        <button type="submit" class="btn btn-primary" data-slot="submit">Check in</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="reservation-dialog" aria-labelledby="reservation-title">
+    <form class="dialog-form" id="reservation-form" novalidate>
+      <header class="dialog-head">
+        <h2 class="dialog-title" id="reservation-title">New reservation</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">
+          <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </header>
+      <div class="dialog-body">
+        <div class="field-grid">
+          <div class="field field-wide">
+            <label for="nr-room">Room</label>
+            <select id="nr-room" name="room_number" required aria-describedby="nr-room-info nr-room-error"></select>
+            <p class="field-note" id="nr-room-info"></p>
+            <p class="field-error" id="nr-room-error" hidden></p>
+          </div>
+          <div class="field field-wide">
+            <label for="nr-guest">Guest name</label>
+            <input id="nr-guest" name="guest_name" type="text" maxlength="120" autocomplete="off" required aria-describedby="nr-guest-error">
+            <p class="field-error" id="nr-guest-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="nr-arrival">Arrival</label>
+            <input id="nr-arrival" name="arrival_date" type="date" required>
+          </div>
+          <div class="field">
+            <label for="nr-departure">Departure</label>
+            <input id="nr-departure" name="departure_date" type="date" required aria-describedby="nr-departure-error">
+            <p class="field-error" id="nr-departure-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="nr-adults">Adults</label>
+            <input id="nr-adults" name="adults" type="number" min="1" max="20" step="1" inputmode="numeric" required aria-describedby="nr-party-error">
+          </div>
+          <div class="field">
+            <label for="nr-children">Children</label>
+            <input id="nr-children" name="children" type="number" min="0" max="20" step="1" inputmode="numeric" aria-describedby="nr-party-error">
+          </div>
+          <p class="field-error field-wide" id="nr-party-error" hidden></p>
+          <div class="field field-wide">
+            <label for="nr-notes">Notes <span class="optional">optional</span></label>
+            <textarea id="nr-notes" name="notes" rows="2" maxlength="500" placeholder="Special requests, arrival time"></textarea>
+          </div>
+        </div>
+        <div class="form-error" data-slot="error" role="alert" hidden></div>
+      </div>
+      <footer class="dialog-foot">
+        <p class="dialog-foot-note tabular" id="nr-summary"></p>
+        <button type="button" class="btn" data-close>Close</button>
+        <button type="submit" class="btn btn-primary" data-slot="submit">Create reservation</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialog dialog-small" id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+    <form class="dialog-form" id="confirm-form">
+      <header class="dialog-head">
+        <h2 class="dialog-title" id="confirm-title"></h2>
+      </header>
+      <div class="dialog-body">
+        <p class="confirm-body" id="confirm-body"></p>
+        <div class="form-error" data-slot="error" role="alert" hidden></div>
+      </div>
+      <footer class="dialog-foot">
+        <button type="button" class="btn" data-close>Keep as is</button>
+        <button type="submit" class="btn btn-primary" data-slot="submit"></button>
+      </footer>
+    </form>
+  </dialog>
+
+  <template id="tpl-floor">
+    <section class="floor">
+      <h3 class="floor-label"><span data-slot="label"></span> <span class="floor-count tabular" data-slot="count"></span></h3>
+      <div class="floor-rooms" data-slot="rooms"></div>
+    </section>
+  </template>
+
+  <template id="tpl-tile">
+    <button type="button" class="tile" aria-haspopup="dialog" aria-expanded="false">
+      <span class="tile-top">
+        <span class="tile-number tabular" data-slot="number"></span>
+        <svg class="icon tile-icon" aria-hidden="true"><use data-slot="icon" href="#i-clean"/></svg>
+      </span>
+      <span class="tile-type" data-slot="type"></span>
+      <span class="tile-detail" data-slot="detail"></span>
+      <span class="tile-flag tabular" data-slot="flag"></span>
+    </button>
+  </template>
+
+  <template id="tpl-row">
+    <tr class="res-row">
+      <td class="c-room" data-slot="room"></td>
+      <td class="c-guest"><span class="guest" data-slot="guest"></span> <span class="tags" data-slot="tags"></span></td>
+      <td class="c-stay tabular"><span data-slot="stay"></span> <span class="sub" data-slot="nights"></span></td>
+      <td class="c-party" data-slot="party"></td>
+      <td class="c-notes"><span class="notes" data-slot="notes"></span></td>
+      <td class="c-actions"><span class="row-actions" data-slot="actions"></span></td>
+    </tr>
+  </template>
+
+  <template id="tpl-form-error">
+    <span class="rule-code tabular" data-slot="code"></span>
+    <span class="form-error-text">
+      <strong class="form-error-title" data-slot="title"></strong>
+      <span data-slot="message"></span>
+    </span>
+  </template>
+
+  <template id="tpl-toast">
+    <div class="toast">
+      <span class="rule-code tabular" data-slot="code" hidden></span>
+      <p class="toast-text" data-slot="message"></p>
+      <button type="button" class="icon-btn toast-close" aria-label="Dismiss notification">
+        <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+      </button>
+    </div>
+  </template>
+</body>
+</html>

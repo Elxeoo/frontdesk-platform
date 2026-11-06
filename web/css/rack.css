@@ -1,0 +1,396 @@
+/* Room rack: status legend, floors, room tiles and the room action menu. */
+
+/* Each status maps the shared tile variables to its palette, so tiles, chips and swatches stay in sync. */
+[data-status="clean"] {
+  --st-bg: var(--st-clean-bg);
+  --st-border: var(--st-clean-border);
+  --st-fg: var(--st-clean-fg);
+  --st-accent: var(--st-clean-accent);
+}
+
+[data-status="occupied"] {
+  --st-bg: var(--st-occupied-bg);
+  --st-border: var(--st-occupied-border);
+  --st-fg: var(--st-occupied-fg);
+  --st-accent: var(--st-occupied-accent);
+}
+
+[data-status="dirty"] {
+  --st-bg: var(--st-dirty-bg);
+  --st-border: var(--st-dirty-border);
+  --st-fg: var(--st-dirty-fg);
+  --st-accent: var(--st-dirty-accent);
+}
+
+[data-status="out_of_order"] {
+  --st-bg: var(--st-ooo-bg);
+  --st-border: var(--st-ooo-border);
+  --st-fg: var(--st-ooo-fg);
+  --st-accent: var(--st-ooo-accent);
+}
+
+/* Legend */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.legend-count {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.swatch {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--st-border);
+  border-radius: var(--radius-sm);
+  background: var(--st-bg);
+  color: var(--st-fg);
+}
+
+.swatch .icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.9;
+}
+
+/* Floors */
+
+.rack {
+  padding: var(--space-1) var(--space-4) var(--space-3);
+}
+
+.floor {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding-block: 10px;
+}
+
+.floor + .floor {
+  border-top: 1px solid var(--border);
+}
+
+.floor-label {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding-top: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+.floor-count {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.floor-rooms {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--space-2);
+}
+
+@media (max-width: 639px) {
+  .rack {
+    padding-inline: var(--space-3);
+  }
+
+  .floor {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+
+  .floor-label {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-top: 0;
+  }
+
+  .floor-rooms {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  }
+}
+
+/* Tiles */
+
+.tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 1px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 6px 8px 6px 11px;
+  border: 1px solid var(--st-border);
+  border-radius: var(--radius);
+  background: var(--st-bg);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--st-accent);
+  transition: background-color var(--dur) var(--ease);
+}
+
+.tile[data-status="out_of_order"] {
+  background: repeating-linear-gradient(135deg, var(--st-ooo-bg) 0 6px, var(--st-ooo-stripe) 6px 12px);
+}
+
+.tile:hover {
+  border-color: var(--st-accent);
+}
+
+.tile:active {
+  transform: translateY(1px);
+}
+
+.tile[aria-expanded="true"] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
+}
+
+.tile.is-changed {
+  animation: tile-pulse 900ms var(--ease);
+}
+
+@keyframes tile-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--st-accent) 70%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--st-accent) 0%, transparent);
+  }
+}
+
+.tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.tile-number {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.tile-icon {
+  color: var(--st-fg);
+  stroke-width: 1.8;
+}
+
+.tile-type,
+.tile-detail,
+.tile-flag {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile-type {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.tile-detail {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--st-fg);
+}
+
+.tile-flag {
+  min-height: 1.45em;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.tile[data-flag="warn"] .tile-flag {
+  color: var(--warn-fg);
+  font-weight: 600;
+}
+
+.tile[data-flag="danger"] .tile-flag {
+  color: var(--danger-fg);
+  font-weight: 600;
+}
+
+/* A room with an arrival waiting but not ready gets a corner notch. */
+.tile[data-flag="warn"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 12px 12px 0;
+  border-color: transparent var(--warn-fg) transparent transparent;
+}
+
+/* Room menu (popover anchored to a tile) */
+
+.room-menu {
+  inset: auto;
+  top: var(--menu-top, 0px);
+  left: var(--menu-left, 0px);
+  width: 260px;
+  max-width: calc(100vw - 16px);
+  margin: 0;
+  padding: var(--space-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+
+.room-menu:popover-open {
+  animation: menu-in var(--dur-fast) var(--ease);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.menu-head {
+  display: grid;
+  gap: 2px;
+  margin-bottom: var(--space-1);
+  padding: var(--space-2) 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.menu-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.menu-sub {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.menu-warn {
+  margin-top: var(--space-1);
+  color: var(--warn-fg);
+  font-weight: 550;
+}
+
+.menu-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--st-border);
+  border-radius: var(--radius-sm);
+  background: var(--st-bg);
+  color: var(--st-fg);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.menu-status .icon {
+  width: 12px;
+  height: 12px;
+}
+
+.menu-group {
+  padding: 6px 10px 2px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--text-md);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  outline: none;
+  background: var(--surface-hover);
+}
+
+.menu-item:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus);
+}
+
+.menu-item .swatch {
+  margin-top: 1px;
+}
+
+.menu-item-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.menu-item-label {
+  font-weight: 550;
+}
+
+.menu-item-hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.menu-item-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--text-muted);
+}
+
+.menu-sep {
+  height: 1px;
+  margin: var(--space-1) 0;
+  background: var(--border);
+}
