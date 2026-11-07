@@ -1,0 +1,9 @@
+**/__pycache__
+**/frontdesk.egg-info
+.venv
+tests
+scripts
+requirements-dev.txt
+.pytest_cache
+.ruff_cache
+Dockerfile
