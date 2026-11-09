@@ -50,3 +50,14 @@ jobs:
       - run: pytest                     # right: db tests really run
         env:
           TEST_DATABASE_URL: postgresql://frontdesk:frontdesk@localhost:5432/frontdesk_test
+  smoke:
+    needs: [lint, test]          # start only if both jobs are green (fail fast)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose up -d --build   # build both images (no push) and start the stack
+      - run: timeout 90 bash -c 'until curl -sf http://127.0.0.1:18080/readyz; do sleep 2; done'
+        # wait until the API says ready; give up after 90 s
+      - run: bash scripts/smoke-test.sh     # the same script you ran by hand yesterday
+      - if: failure()                       # only when an earlier step failed
+        run: docker compose logs            # print container logs for diagnosis
