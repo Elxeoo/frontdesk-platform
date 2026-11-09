@@ -1,0 +1,63 @@
+name: pr-checks                  # name shown in the Actions tab
+
+on:
+  pull_request:                  # run on every PR...
+    branches: [main]             # ...that targets main
+                                 # no `paths:` filter: a required check skipped by a filter waits forever
+
+permissions:
+  contents: read                 # least privilege: the token can only read the repo (201-2)
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04        # fixed runner image, not ubuntu-latest
+    defaults:
+      run:
+        working-directory: app   # every `run:` step starts inside app/
+    steps:
+      - uses: actions/checkout@v7          # copy the repo onto the empty runner
+      - uses: actions/setup-python@v7      # install Python on the runner
+        with:
+          python-version: "3.13"           # same as the Dockerfile base image
+      - run: pip install --require-hashes -r requirements-dev.txt   # pinned tools, hash-checked
+      - run: ruff check .                  # lint rules
+      - run: ruff format --check .         # formatting; --check = report only, change nothing
+      
+  test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    services:
+      db:
+        image: postgres:18.6-alpine3.24        # same image as compose.yaml
+        env:
+          POSTGRES_USER: frontdesk
+          POSTGRES_PASSWORD: frontdesk
+          POSTGRES_DB: frontdesk_test          # name must end in _test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U frontdesk"
+          --health-interval 2s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: pip install --require-hashes -r requirements-dev.txt
+      - run: pip install --no-deps -e .        # install our own app package
+      - run: pytest                     # right: db tests really run
+        env:
+          TEST_DATABASE_URL: postgresql://frontdesk:frontdesk@localhost:5432/frontdesk_test
+  smoke:
+    needs: [lint, test]          # start only if both jobs are green (fail fast)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose up -d --build   # build both images (no push) and start the stack
+      - run: timeout 90 bash -c 'until curl -sf http://127.0.0.1:18080/readyz; do sleep 2; done'
+        # wait until the API says ready; give up after 90 s
+      - run: bash scripts/smoke-test.sh     # the same script you ran by hand yesterday
+      - if: failure()                       # only when an earlier step failed
+        run: docker compose logs            # print container logs for diagnosis
