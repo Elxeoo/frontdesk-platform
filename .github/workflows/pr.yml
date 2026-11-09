@@ -59,5 +59,21 @@ jobs:
       - run: timeout 90 bash -c 'until curl -sf http://127.0.0.1:18080/readyz; do sleep 2; done'
         # wait until the API says ready; give up after 90 s
       - run: bash scripts/smoke-test.sh     # the same script you ran by hand yesterday
+      - name: Scan api image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: frontdesk-platform-api:latest   # compose names images <folder>-<service>
+          version: v0.76.2                           # pin the Trivy binary too, not only the action
+          severity: CRITICAL,HIGH                    # only the serious findings
+          ignore-unfixed: true   
+          exit-code: "1"                       # no fix exists yet = nothing we can do, skip
+      - name: Scan web image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: frontdesk-platform-web:latest
+          version: v0.76.2
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"      
       - if: failure()                       # only when an earlier step failed
         run: docker compose logs            # print container logs for diagnosis
