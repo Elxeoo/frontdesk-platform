@@ -48,6 +48,8 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip                                      # save pip downloads in GitHub's cache storage
+          cache-dependency-path: app/requirements-dev.txt # cache key = fingerprint of this file
+
       - run: pip install --require-hashes -r requirements-dev.txt
       - run: pip install --no-deps -e .        # install our own app package
       - run: pytest                     # right: db tests really run
