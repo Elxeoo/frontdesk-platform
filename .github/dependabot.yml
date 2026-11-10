@@ -1,0 +1,28 @@
+version: 2                                # config format version; always 2
+
+updates:
+  - package-ecosystem: "pip"              # Python packages
+    directory: "/app"                     # pyproject.toml and requirements*.txt live here
+    schedule:
+      interval: "weekly"                  # once a week: fewer PRs to review
+    commit-message:
+      prefix: "build"                     # matches our commit format: build(deps): bump ...
+      include: "scope"
+
+  - package-ecosystem: "docker"           # FROM lines in the Dockerfiles
+    directories:
+      - "/app"
+      - "/web"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"   # uses: lines in the workflows
+    directory: "/"                        # "/" = Dependabot looks in .github/workflows
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
