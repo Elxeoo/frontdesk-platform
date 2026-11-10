@@ -15,6 +15,11 @@ updates:
       - "/web"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"              # every base image
+        update-types: ["version-update:semver-minor"]
+        # minor jumps (python 3.14, nginx 1.31 mainline) are a deliberate choice, not a bot PR;
+        # patch updates still arrive
     commit-message:
       prefix: "build"
       include: "scope"
