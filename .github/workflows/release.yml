@@ -18,7 +18,7 @@ jobs:
   release:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7          # copy the repo onto the empty runner
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1          # copy the repo onto the empty runner
 
       # 1) build: give the image its full GHCR address from the start
       - run: docker build -t "$API_IMAGE" ./app
