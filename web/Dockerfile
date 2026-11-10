@@ -1,4 +1,4 @@
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine3.24
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine3.24
 # Install Alpine security fixes published after the base image was built.
 # The base image runs as user 101; switch to root only for the upgrade.
 USER root
