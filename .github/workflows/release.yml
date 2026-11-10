@@ -1,0 +1,58 @@
+name: release                    # name shown in the Actions tab
+
+on:
+  push:
+    branches: [main]             # runs only after a PR is merged into main
+    paths-ignore:
+      - "deploy/**"              # bot commits to deploy/ must not trigger a new build (loop guard, 305)
+
+permissions:
+  contents: read                 # checkout needs to read the repo
+  packages: write                # push images to GHCR; nothing else
+
+env:
+  API_IMAGE: ghcr.io/elxeoo/frontdesk-api:${{ github.sha }}   # tag = commit SHA, never latest
+  WEB_IMAGE: ghcr.io/elxeoo/frontdesk-web:${{ github.sha }}   # registry path must be lowercase
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7          # copy the repo onto the empty runner
+
+      # 1) build: give the image its full GHCR address from the start
+      - run: docker build -t "$API_IMAGE" ./app
+      - run: docker build -t "$WEB_IMAGE" ./web
+
+      # 2) scan: same gate as pr.yml, on the exact image we are about to push
+      - name: Scan api image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.API_IMAGE }}
+          version: v0.76.2
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true             # no fix exists yet = nothing we can do, skip
+          exit-code: "1"                   # a finding fails the step (default 0 = fake green)
+      - name: Scan web image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.WEB_IMAGE }}
+          version: v0.76.2
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+      # 3) push: reached only if both scans are green
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}   # short-lived token GitHub creates for this run only
+        run: echo "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        # --password-stdin: the secret comes through a pipe, never as a -p argument
+      - run: docker push "$API_IMAGE"
+      - run: docker push "$WEB_IMAGE"
+
+      # 4) digest: the registry stamps it during push, so we can only read it now
+      - name: Print digests
+        run: |
+          docker inspect --format '{{index .RepoDigests 0}}' "$API_IMAGE"
+          docker inspect --format '{{index .RepoDigests 0}}' "$WEB_IMAGE"
