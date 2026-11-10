@@ -15,8 +15,8 @@ jobs:
       run:
         working-directory: app
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"           # same as the Dockerfile base image
       - run: pip install --require-hashes -r requirements-dev.txt
@@ -41,8 +41,8 @@ jobs:
           --health-interval 2s
           --health-retries 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
       - run: pip install --require-hashes -r requirements-dev.txt
@@ -54,7 +54,7 @@ jobs:
     needs: [lint, test]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: docker compose up -d --build
       - run: timeout 90 bash -c 'until curl -sf http://127.0.0.1:18080/readyz; do sleep 2; done'
         # wait until the API says ready; give up after 90 s
@@ -65,8 +65,8 @@ jobs:
           image-ref: frontdesk-platform-api:latest   # compose names images <folder>-<service>
           version: v0.76.2                           # pin the Trivy binary too, not only the action
           severity: CRITICAL,HIGH
-          ignore-unfixed: true   
-          exit-code: "1"
+          ignore-unfixed: true                       # unfixable findings are not actionable
+          exit-code: "1"                             # a finding fails the step (default 0 = fake green)
       - name: Scan web image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
