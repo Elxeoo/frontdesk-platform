@@ -40,6 +40,10 @@ application often, without putting check-in at risk?
 | `scripts/` | Smoke tests and helper scripts |
 | `docs/` | Contracts, architecture diagrams, decision records (ADRs) |
 
+## Known limitations
+
+- **No SBOM attestation.** Images are scanned and signed, but no software bill of materials is generated or attached to them. Cut to fit the project timeline. Next step: generate a CycloneDX SBOM with Trivy in `release.yml` and attach it to the image digest with `cosign attest`.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
