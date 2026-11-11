@@ -8,7 +8,8 @@ on:
 
 permissions:
   contents: read                 # checkout needs to read the repo
-  packages: write                # push images to GHCR; nothing else
+  packages: write                # push images and signatures to GHCR
+  id-token: write                # request a short-lived OIDC token for keyless signing; no repo write
 
 env:
   API_IMAGE: ghcr.io/elxeoo/frontdesk-api:${{ github.sha }}   # tag = commit SHA, never latest
@@ -56,3 +57,15 @@ jobs:
         run: |
           docker inspect --format '{{index .RepoDigests 0}}' "$API_IMAGE"
           docker inspect --format '{{index .RepoDigests 0}}' "$WEB_IMAGE"
+
+      # 5) sign: keyless, bound to the digest (never the tag)
+      - name: Install cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          cosign-release: v3.1.4         # pin the binary too, not only the action
+      - name: Sign images
+        run: |
+          API_REF=$(docker inspect --format '{{index .RepoDigests 0}}' "$API_IMAGE")
+          WEB_REF=$(docker inspect --format '{{index .RepoDigests 0}}' "$WEB_IMAGE")
+          cosign sign --yes "$API_REF"
+          cosign sign --yes "$WEB_REF"
