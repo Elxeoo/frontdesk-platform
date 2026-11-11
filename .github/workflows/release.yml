@@ -2,9 +2,10 @@ name: release                    # name shown in the Actions tab
 
 on:
   push:
-    branches: [main]             # runs only after a PR is merged into main
+    branches: [main]             # runs after a PR is merged into main
+    tags: ["v*.*.*"]             # and when a release tag like v0.1.0 is pushed
     paths-ignore:
-      - "deploy/**"              # bot commits to deploy/ must not trigger a new build (loop guard, 305)
+      - "deploy/**"              # loop guard for bot commits (305); not applied to tag pushes
 
 permissions:
   contents: read                 # checkout needs to read the repo
@@ -12,8 +13,10 @@ permissions:
   id-token: write                # request a short-lived OIDC token for keyless signing; no repo write
 
 env:
-  API_IMAGE: ghcr.io/elxeoo/frontdesk-api:${{ github.sha }}   # tag = commit SHA, never latest
-  WEB_IMAGE: ghcr.io/elxeoo/frontdesk-web:${{ github.sha }}   # registry path must be lowercase
+  # tag push → name the image after the tag (v0.1.0); otherwise after the commit SHA; never latest
+  API_IMAGE: ghcr.io/elxeoo/frontdesk-api:${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+  WEB_IMAGE: ghcr.io/elxeoo/frontdesk-web:${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+  APP_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || github.sha }}   # the API reports this as its version
 
 jobs:
   release:
@@ -22,7 +25,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1          # copy the repo onto the empty runner
 
       # 1) build: give the image its full GHCR address from the start
-      - run: docker build -t "$API_IMAGE" ./app
+      - run: docker build --build-arg APP_VERSION="$APP_VERSION" -t "$API_IMAGE" ./app
       - run: docker build -t "$WEB_IMAGE" ./web
 
       # 2) scan: same gate as pr.yml, on the exact image we are about to push
