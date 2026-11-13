@@ -4,7 +4,7 @@ Versions used to build and run this project. Updated when a tool is upgraded.
 
 | Tool | Version | Recorded | Note |
 | --- | --- | --- | --- |
-| Kubernetes (k3s) | v1.37.2+k3s1 | 2026-11-12 | Local cluster image, pinned in `infra/k3d/cluster.yaml`; AKS GA since Oct 2026 |
+| Kubernetes (k3s) | v1.36.6+k3s1 | 2026-11-13 | Local cluster image, pinned in `infra/k3d/cluster.yaml`; newest minor CloudNativePG 1.30 supports; GA on AKS |
 | kubectl | v1.37.2 | 2026-11-12 | Within ±1 minor of the cluster |
 | Kustomize | v5.8.1 | 2026-11-12 | Built into kubectl |
 | k3d | v5.9.0 | 2026-11-12 | |
@@ -20,3 +20,5 @@ Versions used to build and run this project. Updated when a tool is upgraded.
 | kubectl-cnpg | 1.30.1 | 2026-11-04 | |
 | kubectl-argo-rollouts | 1.10.1 | 2026-11-04 | |
 | cosign | 3.1.4 | 2026-11-11 | |
+| CloudNativePG operator | 1.30.1 (Helm chart 0.29.1) | 2026-11-13 | Supports Kubernetes 1.34–1.36 |
+| PostgreSQL | 18.6 | 2026-11-13 | `ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie` |
