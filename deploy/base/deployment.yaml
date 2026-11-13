@@ -32,9 +32,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            # Placeholder until 206: the database does not exist yet, so /readyz stays 503.
             - name: DATABASE_URL
-              value: postgresql://frontdesk@frontdesk-db-rw:5432/frontdesk
+              valueFrom:
+                secretKeyRef:
+                  name: frontdesk-db-app
+                  key: uri
           livenessProbe:
             httpGet:
               path: /healthz
