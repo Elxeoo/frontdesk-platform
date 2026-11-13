@@ -42,11 +42,11 @@ application often, without putting check-in at risk?
 
 ## Local development
 
-Requires Docker, k3d and kubectl. `make test` and `make lint` use the virtual environment in `app/.venv` (setup in [app/README.md](app/README.md)).
+Requires Docker, k3d, kubectl and Helm. `make test` and `make lint` use the virtual environment in `app/.venv` (setup in [app/README.md](app/README.md)).
 
 | Command | What it does |
 | --- | --- |
-| `make up` | Creates the local k3d cluster and applies `deploy/overlays/local` |
+| `make up` | Creates the local k3d cluster, installs the CloudNativePG operator with Helm and applies `deploy/overlays/local` |
 | `make down` | Deletes the local cluster |
 | `make test` | Runs the application tests; database tests are skipped unless `TEST_DATABASE_URL` is set |
 | `make lint` | Checks the code with ruff and renders the Kubernetes manifests |

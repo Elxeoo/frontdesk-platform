@@ -5,6 +5,8 @@ resources:
 images:
   - name: ghcr.io/elxeoo/frontdesk-api
     digest: sha256:5989ee06b7e70097269486d582e43d9ef82e877616c0fae87c50c20ab5ea1354
+  - name: ghcr.io/elxeoo/frontdesk-web
+    digest: sha256:0b8dc51fb1e702dbdfd90307a0015d1ef7625d19dae7a9a9ff1c8ed34bd46ad4
 replicas:
   - name: api
     count: 1
