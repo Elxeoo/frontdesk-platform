@@ -11,6 +11,7 @@ Versions used to build and run this project. Updated when a tool is upgraded.
 | Docker Engine | 29.1.3 | 2026-11-03 | Inside WSL |
 | Helm | 3.22.0 | 2026-11-03 | |
 | Terraform | 1.17.1 | 2026-11-04 | |
+| AzureRM provider | 5.14.0 | 2026-11-14 | Constraint `~> 5.0`; exact version in `infra/terraform/bootstrap/.terraform.lock.hcl` |
 | gh | 2.103.3 | 2026-11-04 | |
 | Trivy | 0.76.1 | 2026-11-04 | |
 | k9s | 0.51.0 | 2026-11-04 | |
