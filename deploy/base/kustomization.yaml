@@ -8,5 +8,6 @@ resources:
   - configmap.yaml
   - database.yaml
   - migrate-job.yaml
+  - night-audit-cronjob.yaml
   - deployment.yaml
   - service.yaml
