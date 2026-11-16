@@ -12,6 +12,10 @@ permissions:
   packages: write
   id-token: write                # request a short-lived OIDC token for keyless signing; no repo write
 
+concurrency:
+  group: release
+  queue: max
+
 env:
   # tag push: tag name; otherwise commit SHA; never latest
   API_IMAGE: ghcr.io/elxeoo/frontdesk-api:${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
