@@ -13,3 +13,5 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
+# Only root modules pin providers; child modules use the caller's lock file.
+infra/terraform/modules/**/.terraform.lock.hcl

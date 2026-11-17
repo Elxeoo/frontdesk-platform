@@ -1,0 +1,16 @@
+parameters:
+  - name: version
+    type: string
+
+steps:
+  - bash: |
+      set -euo pipefail
+      cd "$(Agent.TempDirectory)"
+      base="https://releases.hashicorp.com/terraform/${{ parameters.version }}"
+      curl -sSfLO "$base/terraform_${{ parameters.version }}_linux_amd64.zip"
+      curl -sSfLO "$base/terraform_${{ parameters.version }}_SHA256SUMS"
+      sha256sum --check --ignore-missing "terraform_${{ parameters.version }}_SHA256SUMS"
+      unzip -q "terraform_${{ parameters.version }}_linux_amd64.zip"
+      sudo install terraform /usr/local/bin/terraform
+      terraform version
+    displayName: Install Terraform ${{ parameters.version }}
