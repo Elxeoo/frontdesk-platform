@@ -4,7 +4,12 @@ trigger:
   paths:
     include: [infra/terraform, infra/pipelines]
 
-pr: none
+# Not a required check on GitHub: the path filter skips it on app-only PRs.
+pr:
+  branches:
+    include: [main]
+  paths:
+    include: [infra/terraform, infra/pipelines]
 
 pool:
   vmImage: ubuntu-24.04
@@ -83,7 +88,7 @@ stages:
 
   - stage: Apply
     dependsOn: Plan
-    # Branch runs stop after Plan; only main changes Azure.
+    # Branch and PR runs stop after Plan; only main changes Azure.
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
       - deployment: apply
