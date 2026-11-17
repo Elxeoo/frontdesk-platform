@@ -1,0 +1,110 @@
+trigger:
+  branches:
+    include: [main]
+  paths:
+    include: [infra/terraform, infra/pipelines]
+
+pr: none
+
+pool:
+  vmImage: ubuntu-24.04
+
+variables:
+  terraformVersion: 1.17.1
+  tflintVersion: v0.65.0
+  trivyVersion: 0.76.2
+  rootDir: infra/terraform/persistent
+
+stages:
+  - stage: Validate
+    jobs:
+      - job: validate
+        steps:
+          - template: steps/install-terraform.yml
+            parameters:
+              version: ${{ variables.terraformVersion }}
+
+          - bash: terraform fmt -check -recursive infra/terraform
+            displayName: terraform fmt
+
+          # No backend: this stage reads only the code, never the state.
+          - bash: |
+              set -euo pipefail
+              terraform -chdir=$(rootDir) init -backend=false -input=false
+              terraform -chdir=$(rootDir) validate
+            displayName: terraform validate
+
+          - bash: |
+              set -euo pipefail
+              cd "$(Agent.TempDirectory)"
+              base="https://github.com/terraform-linters/tflint/releases/download/$(tflintVersion)"
+              curl -sSfLO "$base/tflint_linux_amd64.zip"
+              curl -sSfLO "$base/checksums.txt"
+              sha256sum --check --ignore-missing checksums.txt
+              unzip -q tflint_linux_amd64.zip
+              sudo install tflint /usr/local/bin/tflint
+            displayName: Install TFLint $(tflintVersion)
+
+          - bash: tflint --recursive
+            workingDirectory: infra/terraform
+            displayName: tflint
+
+          - bash: >
+              docker run --rm
+              -v "$(Build.SourcesDirectory)/infra/terraform:/src:ro"
+              aquasec/trivy:$(trivyVersion)
+              config --exit-code 1 --severity HIGH,CRITICAL /src
+            displayName: trivy config
+
+  - stage: Plan
+    dependsOn: Validate
+    jobs:
+      - job: plan
+        steps:
+          - template: steps/install-terraform.yml
+            parameters:
+              version: ${{ variables.terraformVersion }}
+
+          - task: AzureCLI@2
+            displayName: terraform plan
+            inputs:
+              azureSubscription: sc-azure-frontdesk
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                export TF_VAR_subscription_id="$(az account show --query id -o tsv)"
+                terraform -chdir=$(rootDir) init -input=false
+                terraform -chdir=$(rootDir) plan -input=false -out=tfplan
+
+          # Apply runs this exact file, so what was reviewed is what gets built.
+          - publish: $(rootDir)/tfplan
+            artifact: tfplan
+
+  - stage: Apply
+    dependsOn: Plan
+    # Branch runs stop after Plan; only main changes Azure.
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: apply
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - template: steps/install-terraform.yml
+                  parameters:
+                    version: ${{ variables.terraformVersion }}
+
+                - task: AzureCLI@2
+                  displayName: terraform apply
+                  inputs:
+                    azureSubscription: sc-azure-frontdesk
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+                      terraform -chdir=$(rootDir) init -input=false
+                      terraform -chdir=$(rootDir) apply -input=false "$(Pipeline.Workspace)/tfplan/tfplan"
