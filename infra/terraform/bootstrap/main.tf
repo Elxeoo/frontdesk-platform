@@ -9,6 +9,10 @@ resource "azurerm_resource_group" "tfstate" {
 }
 
 # Storage account names are global: lowercase, 3-24 chars.
+# The public endpoint stays open because Microsoft-hosted agents have no fixed IP.
+# Access still needs Entra ID and RBAC; shared keys are off. Planned fix: private
+# endpoint in snet-private-endpoints and an agent inside the VNet.
+#trivy:ignore:AZU-0012
 resource "azurerm_storage_account" "tfstate" {
   name                     = "stfrontdesktfelxeoo"
   resource_group_name      = azurerm_resource_group.tfstate.name
