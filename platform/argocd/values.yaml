@@ -1,0 +1,3 @@
+# Sign-in uses the local admin account; no SSO provider is configured.
+dex:
+  enabled: false
