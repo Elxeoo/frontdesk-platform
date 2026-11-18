@@ -21,6 +21,6 @@ Versions used to build and run this project. Updated when a tool is upgraded.
 | kubectl-cnpg | 1.30.1 | 2026-11-04 | |
 | kubectl-argo-rollouts | 1.10.1 | 2026-11-04 | |
 | cosign | 3.1.4 | 2026-11-11 | |
-| CloudNativePG operator | 1.30.1 (Helm chart 0.29.1) | 2026-11-13 | Supports Kubernetes 1.34–1.36 |
+| CloudNativePG operator | 1.30.1 (Helm chart 0.29.1) | 2026-11-13 | Supports Kubernetes 1.34–1.36; chart pinned in `platform/argocd/apps/cnpg.yaml` and `Makefile` |
 | PostgreSQL | 18.6 | 2026-11-13 | `ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie` |
-| Argo CD | v3.6.1 (Helm chart 10.18.0) | 2026-11-18 | Chart pinned in `Makefile`; requires Kubernetes 1.25 or newer |
+| Argo CD | v3.6.1 (Helm chart 10.18.0) | 2026-11-18 | Chart pinned in `platform/argocd/apps/argocd.yaml` and `Makefile`; requires Kubernetes 1.25 or newer |
