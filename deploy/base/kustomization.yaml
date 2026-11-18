@@ -11,4 +11,3 @@ resources:
   - night-audit-cronjob.yaml
   - deployment.yaml
   - service.yaml
-  - prune-check.yaml

@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prune-check
-data:
-  purpose: Exists only to verify that Argo CD prunes resources removed from Git.
