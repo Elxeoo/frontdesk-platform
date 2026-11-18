@@ -4,7 +4,8 @@ trigger:
   paths:
     include: [infra/terraform, infra/pipelines]
 
-# Not a required check on GitHub: the path filter skips it on app-only PRs.
+# The path filter skips app-only PRs, but Azure Pipelines still reports them as neutral,
+# so the check can be required on GitHub without blocking them.
 pr:
   branches:
     include: [main]
