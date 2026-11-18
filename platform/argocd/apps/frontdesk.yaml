@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontdesk
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Elxeoo/frontdesk-platform.git
+    targetRevision: main
+    path: deploy/overlays/local
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: frontdesk
+  syncPolicy:
+    automated: {}

@@ -1,0 +1,18 @@
+# Applied once by hand; everything under apps/ is then managed from Git.
+# No finalizer, so deleting this app does not delete the apps it created.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Elxeoo/frontdesk-platform.git
+    targetRevision: main
+    path: platform/argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated: {}
