@@ -12,7 +12,10 @@ spec:
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      backoffLimit: 2
+      # A missed run starts as soon as the cluster comes up, often before the
+      # database accepts connections. Retries back off 10s, 20s, 40s ... so six
+      # of them cover about ten minutes of start-up.
+      backoffLimit: 6
       template:
         metadata:
           labels:
