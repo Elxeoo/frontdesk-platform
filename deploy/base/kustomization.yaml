@@ -11,3 +11,45 @@ resources:
   - night-audit-cronjob.yaml
   - deployment.yaml
   - service.yaml
+# Argo CD sync waves: a wave starts only after every resource in the previous wave is healthy.
+patches:
+  - patch: |-
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
+        name: frontdesk-db
+        annotations:
+          argocd.argoproj.io/sync-wave: "0"
+  # A Job cannot be changed in place, so it runs as a hook that is recreated on every sync.
+  # If the migration fails, the sync stops here and the new api version is never started.
+  - patch: |-
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: migrate
+        annotations:
+          argocd.argoproj.io/hook: Sync
+          argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+          argocd.argoproj.io/sync-wave: "1"
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: api
+        annotations:
+          argocd.argoproj.io/sync-wave: "2"
+  - patch: |-
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: night-audit
+        annotations:
+          argocd.argoproj.io/sync-wave: "2"
+  # The web pages call the api, so they open only after the api is ready.
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: web
+        annotations:
+          argocd.argoproj.io/sync-wave: "3"
