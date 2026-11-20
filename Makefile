@@ -5,13 +5,15 @@ ARGOCD_CHART_VERSION := 10.18.0
 
 .PHONY: up down test lint
 
+# CloudNativePG is installed before Argo CD because the database Cluster kind exists only after its CRDs.
+# The root app hands everything else to Argo CD, which applies the app in sync-wave order.
 up:
 	k3d cluster create --config $(CLUSTER_CONFIG)
 	helm repo add cnpg https://cloudnative-pg.github.io/charts --force-update
 	helm upgrade --install cnpg cnpg/cloudnative-pg --version $(CNPG_CHART_VERSION) --namespace cnpg-system --create-namespace --wait
 	helm repo add argo https://argoproj.github.io/argo-helm --force-update
 	helm upgrade --install argocd argo/argo-cd --version $(ARGOCD_CHART_VERSION) --namespace argocd --create-namespace -f platform/argocd/values.yaml --wait --timeout 10m
-	kubectl apply -k $(OVERLAY)
+	kubectl apply -f platform/argocd/root.yaml
 
 down:
 	k3d cluster delete frontdesk
