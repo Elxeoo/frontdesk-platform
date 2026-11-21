@@ -1,0 +1,40 @@
+# The chart creates the GatewayClass "traefik" and the Gateway "traefik-gateway", listening on port 8000.
+# Retry covers the first sync on an empty cluster, when the Gateway API CRDs may not exist yet.
+# Prune stays off for the same reason as cnpg: the chart ships Traefik's own CRDs.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: 42.4.1
+    helm:
+      releaseName: traefik
+      valuesObject:
+        providers:
+          kubernetesGateway:
+            enabled: true
+        gateway:
+          listeners:
+            web:
+              namespacePolicy:
+                from: All
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

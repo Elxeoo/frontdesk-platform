@@ -1,3 +1,4 @@
+# Retry covers the first sync on an empty cluster, when the Gateway API CRDs may not exist yet.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -16,3 +17,9 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
