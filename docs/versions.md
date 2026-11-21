@@ -24,3 +24,5 @@ Versions used to build and run this project. Updated when a tool is upgraded.
 | CloudNativePG operator | 1.30.1 (Helm chart 0.29.1) | 2026-11-13 | Supports Kubernetes 1.34–1.36; chart pinned in `platform/argocd/apps/cnpg.yaml` and `Makefile` |
 | PostgreSQL | 18.6 | 2026-11-13 | `ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie` |
 | Argo CD | v3.6.1 (Helm chart 10.18.0) | 2026-11-18 | Chart pinned in `platform/argocd/apps/argocd.yaml` and `Makefile`; requires Kubernetes 1.25 or newer |
+| Traefik | v3.7.19 (Helm chart 42.4.1) | 2026-11-21 | Chart pinned in `platform/argocd/apps/traefik.yaml`; requires Kubernetes 1.30 or newer |
+| Gateway API CRDs | v1.6.3 (standard channel) | 2026-11-21 | Pinned in `platform/argocd/apps/gateway-api.yaml`; the version Traefik v3.7 documents support for (v1.7.0 is newer) |

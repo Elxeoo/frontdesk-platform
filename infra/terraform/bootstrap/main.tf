@@ -8,7 +8,6 @@ resource "azurerm_resource_group" "tfstate" {
   }
 }
 
-# Storage account names are global: lowercase, 3-24 chars.
 # The public endpoint stays open because Microsoft-hosted agents have no fixed IP.
 # Access still needs Entra ID and RBAC; shared keys are off. Planned fix: private
 # endpoint in snet-private-endpoints and an agent inside the VNet.
@@ -20,7 +19,6 @@ resource "azurerm_storage_account" "tfstate" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 
-  # Entra ID only, no shared keys.
   shared_access_key_enabled       = false
   default_to_oauth_authentication = true
   allow_nested_items_to_be_public = false
