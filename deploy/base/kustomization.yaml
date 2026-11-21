@@ -11,7 +11,7 @@ resources:
   - night-audit-cronjob.yaml
   - deployment.yaml
   - service.yaml
-# Argo CD sync waves: a wave starts only after every resource in the previous wave is healthy.
+  - httproute.yaml
 patches:
   - patch: |-
       apiVersion: postgresql.cnpg.io/v1
