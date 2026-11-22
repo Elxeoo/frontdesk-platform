@@ -4,6 +4,7 @@ import { byId, el, placeInOrder, replayClass, setAttr, setText } from '../dom.js
 
 const WINDOW = 20;
 const NO_VERSION = 'no version';
+const COMMIT_SHA = /^[0-9a-f]{40}$/;
 
 const summary = byId('vbadge').querySelector('summary');
 const dot = byId('vb-dot');
@@ -141,9 +142,15 @@ function render() {
   );
 }
 
+/** Main builds report a full commit SHA; show the 7-character form GitHub uses. Tags pass through. */
+function displayVersion(version) {
+  if (!version) return NO_VERSION;
+  return COMMIT_SHA.test(version) ? version.slice(0, 7) : version;
+}
+
 /** Records one API response; rendering is batched to one update per animation frame. */
 export function recordResponse({ version, pod, status }) {
-  samples.push({ version: version || NO_VERSION, pod: pod || 'unknown pod', failed: status >= 500 });
+  samples.push({ version: displayVersion(version), pod: pod || 'unknown pod', failed: status >= 500 });
   if (samples.length > WINDOW) samples.shift();
   if (!frame) frame = requestAnimationFrame(render);
 }
