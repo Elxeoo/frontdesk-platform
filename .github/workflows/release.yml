@@ -6,6 +6,8 @@ on:
     tags: ["v*.*.*"]
     paths-ignore:
       - "deploy/**"              # loop guard for bot commits; not applied to tag pushes
+      - "docs/**"
+      - "**.md"
 
 permissions:
   contents: read
@@ -25,6 +27,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-24.04
+    outputs:
+      api-ref: ${{ steps.digests.outputs.api-ref }}
+      web-ref: ${{ steps.digests.outputs.web-ref }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -58,10 +63,11 @@ jobs:
       - run: docker push "$WEB_IMAGE"
 
       # The registry assigns the digest during push, so it exists only from here on.
-      - name: Print digests
+      - name: Resolve digests
+        id: digests
         run: |
-          docker inspect --format '{{index .RepoDigests 0}}' "$API_IMAGE"
-          docker inspect --format '{{index .RepoDigests 0}}' "$WEB_IMAGE"
+          echo "api-ref=$(docker inspect --format '{{index .RepoDigests 0}}' "$API_IMAGE")" | tee -a "$GITHUB_OUTPUT"
+          echo "web-ref=$(docker inspect --format '{{index .RepoDigests 0}}' "$WEB_IMAGE")" | tee -a "$GITHUB_OUTPUT"
 
       # Keyless signature on the digest, not the tag: a tag can be moved to another image.
       - name: Install cosign
@@ -69,8 +75,49 @@ jobs:
         with:
           cosign-release: v3.1.4         # pin the binary too, not only the action
       - name: Sign images
+        env:
+          API_REF: ${{ steps.digests.outputs.api-ref }}
+          WEB_REF: ${{ steps.digests.outputs.web-ref }}
         run: |
-          API_REF=$(docker inspect --format '{{index .RepoDigests 0}}' "$API_IMAGE")
-          WEB_REF=$(docker inspect --format '{{index .RepoDigests 0}}' "$WEB_IMAGE")
           cosign sign --yes "$API_REF"
           cosign sign --yes "$WEB_REF"
+
+  promote:
+    needs: release
+    if: github.ref_type == 'branch'          # tag builds are releases, not deployments
+    runs-on: ubuntu-24.04
+    permissions: {}                          # git and API calls use the app token, not GITHUB_TOKEN
+    steps:
+      - name: Get bot token
+        id: app-token
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.BOT_CLIENT_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Point the local overlay at the new digests
+        working-directory: deploy/overlays/local
+        env:
+          API_REF: ${{ needs.release.outputs.api-ref }}
+          WEB_REF: ${{ needs.release.outputs.web-ref }}
+        run: kustomize edit set image "$API_REF" "$WEB_REF"
+
+      - name: Open promotion PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          BRANCH: bot/promote-${{ github.sha }}
+        run: |
+          USER_ID=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git commit -am "chore(deploy): promote images built from ${GITHUB_SHA::7}"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore(deploy): promote images built from ${GITHUB_SHA::7}" \
+            --body "Points deploy/overlays/local at the signed digests built from ${GITHUB_SHA}."
