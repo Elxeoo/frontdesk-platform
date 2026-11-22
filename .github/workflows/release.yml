@@ -6,6 +6,8 @@ on:
     tags: ["v*.*.*"]
     paths-ignore:
       - "deploy/**"              # loop guard for bot commits; not applied to tag pushes
+      - "docs/**"
+      - "**.md"
 
 permissions:
   contents: read
