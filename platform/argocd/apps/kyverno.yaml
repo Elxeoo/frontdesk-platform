@@ -1,0 +1,30 @@
+# Prune stays off for the same reason as cnpg: the chart ships Kyverno's own CRDs.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kyverno
+  namespace: argocd
+  annotations:
+    # Recommended in Kyverno's platform notes for Argo CD.
+    argocd.argoproj.io/compare-options: ServerSideDiff=true,IncludeMutationWebhook=true
+spec:
+  project: default
+  source:
+    repoURL: https://kyverno.github.io/kyverno
+    chart: kyverno
+    targetRevision: 3.9.2
+    helm:
+      releaseName: kyverno
+      valuesObject:
+        config:
+          # The default marks the ConfigMap helm.sh/resource-policy: keep; Kyverno's Argo CD notes advise against it.
+          preserve: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kyverno
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
