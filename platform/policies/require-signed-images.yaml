@@ -4,7 +4,7 @@ kind: ImageValidatingPolicy
 metadata:
   name: require-signed-images
 spec:
-  validationActions: [Audit]
+  validationActions: [Deny]
   matchConstraints:
     resourceRules:
       - apiGroups: [""]
