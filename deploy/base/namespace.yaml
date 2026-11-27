@@ -2,3 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: frontdesk
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    # Pinned so a cluster upgrade cannot tighten the rules without a change in Git.
+    pod-security.kubernetes.io/enforce-version: v1.36
