@@ -101,6 +101,7 @@ When every Argo CD Application reports `Synced` and `Healthy`
 | [0005](docs/adr/0005-helm-vs-kustomize.md) | Kustomize for our manifests, Helm for third-party software |
 | [0006](docs/adr/0006-gateway-api.md) | Gateway API with Traefik instead of Ingress |
 | [0007](docs/adr/0007-promotion-by-digest.md) | Promote images by digest through a bot pull request |
+| [0008](docs/adr/0008-kyverno-failure-policy.md) | Kyverno blocks new pods when it cannot decide |
 
 ## Roadmap
 
