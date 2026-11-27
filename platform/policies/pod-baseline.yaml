@@ -5,7 +5,7 @@ metadata:
   name: pod-baseline
   namespace: frontdesk
 spec:
-  validationActions: [Audit]
+  validationActions: [Deny]
   matchConstraints:
     resourceRules:
       - apiGroups: [""]
