@@ -3,9 +3,9 @@ kind: Kustomization
 resources:
 - ../../base
 images:
-- digest: sha256:7516dbbe25d2ebbc62fb1f1f1f99b960b683e5a56d87337408580f60fbb3a829
+- digest: sha256:f9155d7be76bebb32f1aab3f15c1f71b56c5cdc825f0c8ce443620f439b937f1
   name: ghcr.io/elxeoo/frontdesk-api
-- digest: sha256:542854d56e9f617a188733e4c8f661c4b5dd7e9b335f08ef5af9c0cba33a59cb
+- digest: sha256:bbcdd6c3b62319c71b76d9ac52b36e69a4ffcb2d8562341385a64861783a0713
   name: ghcr.io/elxeoo/frontdesk-web
 replicas:
 - count: 1
